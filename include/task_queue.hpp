@@ -20,7 +20,7 @@ public:
 	Frame<N,M> pop() {
 		Frame<N,M> frame; //rvo
 		m_frames.pop(frame);
-		return std::move(frame);
+		return frame;
 	}
 private:
 	RecursiveQueue() {

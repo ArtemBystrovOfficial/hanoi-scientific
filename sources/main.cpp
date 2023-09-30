@@ -4,6 +4,7 @@
 
 #include <thread>
 #include <vector>
+#include <iostream>
 
 int main() {
     	Hanoi<5, 7> hanoi;
@@ -12,4 +13,13 @@ int main() {
 		ths[i] = std::thread([&]() { hanoi.run(); });
 	for (auto & th : ths) 
 		th.join();
+
+	//Frame<4, 9> frame;
+	//frame.drawData();
+	//int x=0, y=1;
+	//while (true) {
+	//	std::cin >> x >> y;
+	//	frame = frame.generateNext(x,y);
+	//	frame.dumpData();
+	//}
 }

@@ -10,7 +10,7 @@ public:
 		static OptimizationPacket<N,M> packet;
 		return packet;
 	}
-	void iterate(frame_moves<N>* moves, const Frame<N,M>& frame) {
+	void iterate(frame_moves* moves, const Frame<N,M>& frame) {
 		for (auto& m_unit : m_units) 
 			m_unit->optimize(moves, frame);
 	}
