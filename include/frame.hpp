@@ -1,6 +1,7 @@
 #pragma once
 
 #include "structs.hpp"
+#include <boost/crc.hpp>
 #include <iostream>
 #include <array>
 
@@ -30,6 +31,18 @@ public:
 	hanoi_limit getDepth() const {
 		return m_data_[HEADER_DEPTH_OFFSET];
 	}
+	uint32_t getHashWithMove(hanoi_limit from, hanoi_limit to) const {
+		boost::crc_32_type result;
+		//Mixin to frame instead of unnecessary data
+		auto before_fir_reg = m_data_[COLUMN_POINTERS_OFFSET + from];
+		auto before_sec_reg = m_data_[COLUMN_POINTERS_OFFSET + to];
+		m_data_[COLUMN_POINTERS_OFFSET + from] = from;
+		m_data_[COLUMN_POINTERS_OFFSET + to] = to;
+		result.process_bytes(m_data_.data(), m_data_.size());
+		m_data_[COLUMN_POINTERS_OFFSET + from] = before_fir_reg;
+		m_data_[COLUMN_POINTERS_OFFSET + to] = before_sec_reg;
+		return result.checksum();
+	}
 	FrameImpl() { //this is initial postion 
 		m_data_[HEADER_DEPTH_OFFSET] = 0;
 		m_data_[COLUMN_POINTERS_OFFSET] = 0;
@@ -48,7 +61,7 @@ public:
 
 		hanoi_limit i = 0;
 		for (;i < COLUMN_POINTERS_OFFSET; ++i)
-			m_data_[i] = frame.m_data_[i];
+			m_data_[i] = frame.m_data_[i] + 1;
 
 		for (;i <= COLUMN_POINTERS_OFFSET + std::min(n_move_from, n_move_to); ++i)
 			m_data_[i] = frame.m_data_[i];
@@ -97,19 +110,19 @@ public:
 		std::cout << std::string(N * 2 - 1, '-') << std::endl;
 		std::cout << "[ RAW ";
 		for (auto elem : m_data_)
-			std::cout << int(elem) << " ";
+			std::cout << uint32_t(elem) << " ";
 		std::cout << " ] " << std::endl;
 		std::cout << std::string(N * 2 - 1, '-') << std::endl;
 		for (int j = M-1; j >= 0; --j) {
 			for (int i = 0; i < N; ++i) 
-				std::cout << (getColumnSize(i) > j ? std::to_string(int(getCircleData(i, j))) + " " : "  ");
+				std::cout << (getColumnSize(i) > j ? std::to_string(uint32_t(getCircleData(i, j))) + " " : "  ");
 			std::cout << std::endl;
 		}
-		std::cout << std::string(N*2 - 1, '-') << std::endl;
+		std::cout << std::string(N*2 - 1, '-') << " | MOV: "<< uint32_t(getDepth()) << std::endl;
 	}
 
 private:
-	std::array<hanoi_limit, HEADER_SIZE + COLUMN_POINTERS_SIZE + DATA_AREA_SIZE> m_data_;
+	mutable std::array<hanoi_limit, HEADER_SIZE + COLUMN_POINTERS_SIZE + DATA_AREA_SIZE> m_data_;
 };
 #pragma pack (pop)
 
@@ -142,6 +155,11 @@ public:
 		return m_moves->isEnd();
 	}
 	bool dumpEnd() {
+		for (int i = 1; i < N; i++) 
+			if (m_impl.getColumnSize(i) == M) {
+				dumpData();
+				return true;
+			}
 		return false;
 	}
 	
@@ -157,6 +175,9 @@ public:
 	}
 	hanoi_limit getDepth() const {
 		return m_impl.getDepth();
+	}
+	uint32_t getHashWithMove(hanoi_limit from, hanoi_limit to) const {
+		return m_impl.getHashWithMove(from, to);
 	}
 	void dumpData() {
 		m_impl.dumpData();

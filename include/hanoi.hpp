@@ -13,7 +13,6 @@ public:
 	void run() {
 		while (true) {
 			Frame<N,M> frame = RecursiveQueue<N,M>::Instance().pop();
-			frame.dumpData();
 			frame_moves moves(make_basic_moves<N>());
 			OptimizationPacket<N,M>::Instance().iterate(&moves, frame);
 			if (frame.dumpEnd() || is_result_promised.load()) {
