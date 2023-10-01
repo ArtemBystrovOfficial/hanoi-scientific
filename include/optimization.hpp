@@ -16,8 +16,7 @@ public:
 	}
 private:
 	OptimizationPacket() {
-		m_units.push_back(std::unique_ptr<OptimizationUnit<N,M>>(dynamic_cast<OptimizationUnit<N,M>*>(new A<N,M>)));
-		m_units.push_back(std::unique_ptr<OptimizationUnit<N,M>>(dynamic_cast<OptimizationUnit<N,M>*>(new B<N,M>)));
+		m_units.push_back(std::unique_ptr<OptimizationUnit<N,M>>(dynamic_cast<OptimizationUnit<N,M>*>(new BasicShiftingRules<N,M>)));
 	}
 
 	std::vector <std::unique_ptr<OptimizationUnit<N,M>>> m_units;

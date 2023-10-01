@@ -38,9 +38,9 @@ public:
 			m_data_[COLUMN_POINTERS_OFFSET + j] = i - DATA_AREA_OFFSET;
 			m_data_[i] = 0;
 		}
-
+		hanoi_limit id = M - 1;
 		std::generate(m_data_.begin() + DATA_AREA_OFFSET + 1, m_data_.end() - (N - 1),
-			[]() { static hanoi_limit i = M - 1; return i--; });
+			[&]() { return id--; });
 
 		m_data_[DATA_AREA_OFFSET] = M;
 	} 
@@ -129,17 +129,17 @@ public:
 		, m_moves(nullptr) {}
 
 //Iterate
-	void acceptMoves(const frame_moves *moves) {
+	void acceptMoves(frame_moves *moves) {
 		m_moves = moves;
-		//m_current_it = m_moves->begin();
+		moves->initBegin();
 	}
 	Frame generateNext() {
-		Frame frame(*this, 0, 0); //rvo
-		//m_current_it++;
+		auto [from, to] = m_moves->nextElem();
+		Frame frame(*this, from, to); //rvo
 		return frame;
 	}
 	bool isEndIterate() {
-		return false; //m_current_it == m_moves->end();
+		return m_moves->isEnd();
 	}
 	bool dumpEnd() {
 		return false;
@@ -152,7 +152,7 @@ public:
 	hanoi_limit getColumnSize(hanoi_limit n) const {
 		return m_impl.getColumnSize(n);
 	}
-	hanoi_limit getLastCircle(hanoi_limit n) {
+	hanoi_limit getLastCircle(hanoi_limit n) const {
 		return m_impl.getLastCircle(n);
 	}
 	hanoi_limit getDepth() const {
@@ -163,5 +163,5 @@ public:
 	}
 private:
 	FrameImpl<N,M> m_impl;
-	const frame_moves* m_moves;
+	frame_moves* m_moves;
 };

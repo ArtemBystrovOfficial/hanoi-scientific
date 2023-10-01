@@ -5,7 +5,24 @@
 using hanoi_limit = uint8_t;
 constexpr hanoi_limit HANOI_LIMIT_NULL = 255; //Reserver
 
-using frame_moves = std::list<std::pair<hanoi_limit, hanoi_limit>>;
+struct frame_moves {
+	using frame_moves_t = std::list <std::pair<hanoi_limit, hanoi_limit>>;
+	
+	void initBegin() {
+		current_elem = moves.begin();
+	}
+
+	std::pair<hanoi_limit, hanoi_limit> nextElem() {
+		return *(current_elem++);
+	}
+
+	bool isEnd() {
+		return current_elem == moves.end();
+	}
+
+	frame_moves_t moves;
+	frame_moves_t::iterator current_elem;
+};
 
 template <hanoi_limit N>
 frame_moves make_basic_moves() {
@@ -13,7 +30,7 @@ frame_moves make_basic_moves() {
 	for (int i = 0; i < N; i++)
 		for (int j = 0; j < N; j++)
 			if (i != j)
-				moves.push_back({ i,j });
+				moves.moves.push_back({ i,j });
 	return moves;
 }
 
