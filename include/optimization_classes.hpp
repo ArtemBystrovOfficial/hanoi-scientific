@@ -3,6 +3,7 @@
 #include "structs.hpp"
 #include <functional>
 #include <unordered_map>
+#include <map>
 
 template<hanoi_limit N, hanoi_limit M>
 class OptimizationUnit {
@@ -50,30 +51,40 @@ public:
 // BAD  6 3     6 3 1
 /////////////////////
 
-using hash_count = uint32_t;
+using hash_count_first_level = uint32_t;
+using hash_count_second_level = uint64_t;
 template<hanoi_limit N, hanoi_limit M>
-class AntiLoopDP : public OptimizationUnit<N,M> {
+class AntiLoopDP : public OptimizationUnit<N, M> {
 public:
 	AntiLoopDP() {
 		m_history.reserve(sizeof(uint32_t));
 	}
 
-	void optimize(frame_moves* moves, const Frame<N,M>& frame) override {
+	void optimize(frame_moves* moves, const Frame<N, M>& frame) override {
 		eraseVisitor(moves, [&](const std::pair<hanoi_limit, hanoi_limit>& move) -> bool {
 			const auto& [from, to] = move;
-			auto hash = frame.getHashWithMove(from, to);
-			auto it = m_history.find(hash);
-			if (it == m_history.end())
-				m_history[hash] = frame.getDepth();
-			else
-				return it->second > frame.getDepth();
-			return true;
-		});
+			Frame frame_new(frame, from, to);
+			auto hash_first = frame_new.getHashFirstLevel();
+			auto hash_second = frame_new.getHashSecondLevel();
+			auto it = m_history.find(hash_first);
+			if (it == m_history.end()) {
+				m_history[hash_first][hash_second] = frame.getDepth();
+				return true;
+			}
+			else {
+				auto it2 = it->second.find(hash_second);
+				if (it2 == it->second.end()) {
+					m_history[hash_first][hash_second] = frame.getDepth();
+					return true;
+				}
+				return it2->second > frame.getDepth();
+			}
+			});
 	}
 private:
-	static std::unordered_map<hash_count, hanoi_limit> m_history;
+	static std::unordered_map<hash_count_first_level, std::map<hash_count_second_level, hanoi_limit> > m_history;
 };
 template<hanoi_limit N, hanoi_limit M>
-std::unordered_map<hash_count, hanoi_limit> AntiLoopDP<N,M>::m_history = {};
+std::unordered_map< hash_count_first_level, std::map<hash_count_second_level, hanoi_limit> > AntiLoopDP<N, M>::m_history = {};
 
 //other optimizations

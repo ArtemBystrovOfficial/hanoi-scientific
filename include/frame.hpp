@@ -5,6 +5,8 @@
 #include <iostream>
 #include <array>
 
+using crc64_t = boost::crc_optimal<64, 0x04C11DB7, 0xFFFFFFFF, 0xFFFFFFFF, true, true>;
+
 #pragma pack (push, 1)
 template<hanoi_limit N, hanoi_limit M>
 class FrameImpl {
@@ -31,16 +33,14 @@ public:
 	hanoi_limit getDepth() const {
 		return m_data_[HEADER_DEPTH_OFFSET];
 	}
-	uint32_t getHashWithMove(hanoi_limit from, hanoi_limit to) const {
+	uint32_t getHashFirstLevel() const {
+		crc64_t result;
+		result.process_bytes(m_data_.data() + COLUMN_POINTERS_OFFSET, m_data_.size());
+		return result.checksum();
+	}
+	uint64_t getHashSecondLevel() const {
 		boost::crc_32_type result;
-		//Mixin to frame instead of unnecessary data
-		auto before_fir_reg = m_data_[COLUMN_POINTERS_OFFSET + from];
-		auto before_sec_reg = m_data_[COLUMN_POINTERS_OFFSET + to];
-		m_data_[COLUMN_POINTERS_OFFSET + from] = from;
-		m_data_[COLUMN_POINTERS_OFFSET + to] = to;
-		result.process_bytes(m_data_.data(), m_data_.size());
-		m_data_[COLUMN_POINTERS_OFFSET + from] = before_fir_reg;
-		m_data_[COLUMN_POINTERS_OFFSET + to] = before_sec_reg;
+		result.process_bytes(m_data_.data() + COLUMN_POINTERS_OFFSET, m_data_.size());
 		return result.checksum();
 	}
 	FrameImpl() { //this is initial postion 
@@ -122,7 +122,7 @@ public:
 	}
 
 private:
-	mutable std::array<hanoi_limit, HEADER_SIZE + COLUMN_POINTERS_SIZE + DATA_AREA_SIZE> m_data_;
+	std::array<hanoi_limit, HEADER_SIZE + COLUMN_POINTERS_SIZE + DATA_AREA_SIZE> m_data_;
 };
 #pragma pack (pop)
 
@@ -176,8 +176,11 @@ public:
 	hanoi_limit getDepth() const {
 		return m_impl.getDepth();
 	}
-	uint32_t getHashWithMove(hanoi_limit from, hanoi_limit to) const {
-		return m_impl.getHashWithMove(from, to);
+	uint32_t getHashFirstLevel() const {
+		return m_impl.getHashFirstLevel();
+	}
+	uint64_t getHashSecondLevel() const {
+		return m_impl.getHashSecondLevel();
 	}
 	void dumpData() {
 		m_impl.dumpData();
