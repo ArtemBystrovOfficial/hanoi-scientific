@@ -5,22 +5,23 @@
 #include <thread>
 #include <vector>
 #include <iostream>
+#include <chrono>
+#include <bitset>
 
 int main() {
-    Hanoi<5, 9> hanoi;
+    Hanoi<5, 14> hanoi;
+	auto start = std::chrono::steady_clock::now();
+#ifdef PARALLEL_MODE
+	std::vector<std::thread> ths(std::thread::hardware_concurrency());
+	for (int i = 0; i < std::thread::hardware_concurrency(); ++i)
+		ths[i] = std::thread([&]() { hanoi.run(); });
+	for (auto& th : ths)
+		th.join();
+#else
 	hanoi.run();
-	//std::vector<std::thread> ths(std::thread::hardware_concurrency());
-	//for (int i = 0; i < std::thread::hardware_concurrency(); ++i)
-	//	ths[i] = std::thread([&]() { hanoi.run(); });
-	//for (auto & th : ths) 
-	//	th.join();
+#endif
 
-	//Frame<4, 9> frame;
-	//frame.drawData();
-	//int x=0, y=1;
-	//while (true) {
-	//	std::cin >> x >> y;
-	//	frame = frame.generateNext(x,y);
-	//	frame.dumpData();
-	//}
+	auto end = std::chrono::steady_clock::now();
+
+	std::cout << "Time execution: " << std::chrono::duration <double, std::milli>(end - start).count() / 1000 << "s";
 }

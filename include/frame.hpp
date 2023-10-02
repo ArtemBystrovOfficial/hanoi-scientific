@@ -1,11 +1,8 @@
 #pragma once
 
 #include "structs.hpp"
-#include <boost/crc.hpp>
 #include <iostream>
 #include <array>
-
-using crc64_t = boost::crc_optimal<64, 0x04C11DB7, 0xFFFFFFFF, 0xFFFFFFFF, true, true>;
 
 #pragma pack (push, 1)
 template<hanoi_limit N, hanoi_limit M>
@@ -33,15 +30,10 @@ public:
 	hanoi_limit getDepth() const {
 		return m_data_[HEADER_DEPTH_OFFSET];
 	}
-	uint32_t getHashFirstLevel() const {
-		crc64_t result;
-		result.process_bytes(m_data_.data() + COLUMN_POINTERS_OFFSET, m_data_.size());
-		return result.checksum();
-	}
-	uint64_t getHashSecondLevel() const {
-		boost::crc_32_type result;
-		result.process_bytes(m_data_.data() + COLUMN_POINTERS_OFFSET, m_data_.size());
-		return result.checksum();
+	uuid_columns_pack_t<N> getHashColumns() const {
+		uuid_columns_pack_t<N> pack; //rvo
+		storeColumnsUuids(&pack);
+		return pack;
 	}
 	FrameImpl() { //this is initial postion 
 		m_data_[HEADER_DEPTH_OFFSET] = 0;
@@ -118,10 +110,24 @@ public:
 				std::cout << (getColumnSize(i) > j ? std::to_string(uint32_t(getCircleData(i, j))) + " " : "  ");
 			std::cout << std::endl;
 		}
-		std::cout << std::string(N*2 - 1, '-') << " | MOV: "<< uint32_t(getDepth()) << std::endl;
+		std::cout << std::string(N*2 - 1, '-') << " | MOV: "<< uint32_t(getDepth()) << " ( "<< uint32_t(getDepth())*2-1 <<" ) " << std::endl;
+	}
+	
+private:
+	void storeColumnsUuids(uuid_columns_pack_t<N> *arr) const {
+		for (hanoi_limit i = 0; i < N-1; ++i)
+			arr->at(i) = getUuidColumn(i+1);
+		std::sort(arr->rbegin(), arr->rend());
 	}
 
-private:
+	uint64_t getUuidColumn(int n) const {
+		uint64_t sum = 0;
+		for (hanoi_limit i = 0; i < getColumnSize(n); ++i) {
+			sum += std::pow(2,getCircleData(n, i));
+		}
+		return sum;
+	}
+
 	std::array<hanoi_limit, HEADER_SIZE + COLUMN_POINTERS_SIZE + DATA_AREA_SIZE> m_data_;
 };
 #pragma pack (pop)
@@ -155,11 +161,10 @@ public:
 		return m_moves->isEnd();
 	}
 	bool dumpEnd() {
-		for (int i = 1; i < N; i++) 
-			if (m_impl.getColumnSize(i) == M) {
-				dumpData();
-				return true;
-			}
+		if (!m_impl.getColumnSize(0)) {
+			dumpData();
+			return true;
+		}
 		return false;
 	}
 	
@@ -176,11 +181,8 @@ public:
 	hanoi_limit getDepth() const {
 		return m_impl.getDepth();
 	}
-	uint32_t getHashFirstLevel() const {
-		return m_impl.getHashFirstLevel();
-	}
-	uint64_t getHashSecondLevel() const {
-		return m_impl.getHashSecondLevel();
+	auto getHashColumns() const {
+		return m_impl.getHashColumns();
 	}
 	void dumpData() {
 		m_impl.dumpData();
