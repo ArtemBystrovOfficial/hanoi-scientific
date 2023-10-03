@@ -2,7 +2,6 @@
 #include "optimization_classes.hpp"
 #include <memory>
 #include <vector>
-//SINGLETON
 
 template<hanoi_limit N, hanoi_limit M, class Unit>
 std::unique_ptr<OptimizationUnit<N, M>>static inline make_unit() {
@@ -30,13 +29,17 @@ public:
 		}
 		std::cout << "Total frames: " << count_all_frames << std::endl;
 	}
+
 private:
 	OptimizationPacket() : count_all_frames(0) {
-		m_units.push_back(make_unit <N, M,  BasicShiftingRules<N, M>>());
-		m_units.push_back(make_unit <N, M,  AntiLoopDP<N, M>>());
-		m_units.push_back(make_unit <N, M,  EmptyMove<N, M>>());
 		m_units.push_back(make_unit <N, M, AdvantageColumns<N, M>>());
+		m_units.push_back(make_unit <N, M, BasicShiftingRules<N, M>>());
+		m_units.push_back(make_unit <N, M, BadGenerations<N, M>>());
+		m_units.push_back(make_unit <N, M, AntiLoopDP<N, M>>());
+		m_units.push_back(make_unit <N, M, EmptyMove<N, M>>());
+		m_units.push_back(make_unit <N, M, SimetricMoves<N, M>>());
 	}
 	std::vector <std::unique_ptr<OptimizationUnit<N,M>>> m_units;
 	uint64_t count_all_frames;
 };
+

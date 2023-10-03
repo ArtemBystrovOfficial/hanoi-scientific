@@ -3,6 +3,8 @@
 #include <list>
 #include <boost/crc.hpp>
 
+//#define PARALLEL_MODE
+
 using hanoi_limit = uint8_t;
 constexpr hanoi_limit HANOI_LIMIT_NULL = 255; //Reserver
 
@@ -10,9 +12,6 @@ using crc64_t = boost::crc_optimal<64, 0x04C11DB7, 0xFFFFFFFF, 0xFFFFFFFF, true,
 
 template<hanoi_limit N>
 using uuid_columns_pack_t = std::array<uint32_t, N>;
-
-//#define PARALLEL_MODE
-
 struct frame_moves {
 	using frame_moves_t = std::list <std::pair<hanoi_limit, hanoi_limit>>;
 	
@@ -41,5 +40,6 @@ frame_moves make_basic_moves() {
 				moves.moves.push_back({ i,j });
 	return moves;
 }
+
 
 //Доделать итерацию по мувам и сделать первые верные ходы хотябы куда можно

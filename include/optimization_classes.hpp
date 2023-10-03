@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <map>
 
+
 #ifdef PARALLEL_MODE
 #include <shared_mutex>
 #endif
@@ -118,6 +119,43 @@ template<hanoi_limit N, hanoi_limit M>
 std::shared_mutex AntiLoopDP<N, M>::mut = {};
 #endif
 
+
+// BAD GENERATIONS  
+#include <iostream>
+template<hanoi_limit N, hanoi_limit M>
+class BadGenerations : public OptimizationUnit<N, M> {
+public:
+	BadGenerations() {
+		m_minimal_move.reserve(sizeof(hanoi_limit));
+	}
+
+	void optimize(frame_moves* moves, const Frame<N, M>& frame) override {
+		bool is_kill = false;
+
+		//auto frame_depth = frame.getDepth();
+		auto [depth_from_max_circle, max_circle] = frame.getMaxCircle();
+		auto it = m_minimal_move.find(depth_from_max_circle);
+
+		if (it == m_minimal_move.end())
+			m_minimal_move[depth_from_max_circle] = max_circle;
+		else {
+			if (it->second > max_circle + 1)
+				is_kill = true;
+			else if(it->second < max_circle) 
+				m_minimal_move[depth_from_max_circle] = max_circle;
+		}
+		all_count_of_remove += eraseVisitor(moves, [&](const std::pair<hanoi_limit, hanoi_limit>& move) -> bool {;
+			return !is_kill;
+		});
+	}
+	std::string name() const override {
+		return "BadGenerations";
+	}
+private:
+	//DEPTH - MAX CIRCLE
+	std::unordered_map<hanoi_limit, hanoi_limit> m_minimal_move;
+};
+
 // EMPTY MOVE
 //      ___		   V___
 //    4 | |		   1  |
@@ -139,14 +177,11 @@ public:
 	}
 };
 
-
 // THE ADVANTAGE OF NON-FIRST COLUMNS
-//   
-//	   <--        ---	
+//	   ---        ---	
 //     2 |        2 |
 //	ok 3 1    bad 3 v 1
 ////////////////////////
-#include <iostream>
 template<hanoi_limit N, hanoi_limit M>
 class AdvantageColumns : public OptimizationUnit<N, M> {
 public:
@@ -166,3 +201,30 @@ public:
 		return "AdvantageColumns";
 	}
 };
+
+// SIMETRIC MOVES   
+//	   ----|        --|	
+//     1   |        1 |
+//	ok 2   V    bad 2 V 
+////////////////////////
+template<hanoi_limit N, hanoi_limit M>
+class SimetricMoves : public OptimizationUnit<N, M> {
+public:
+	void optimize(frame_moves* moves, const Frame<N, M>& frame) override {
+		bool stop_simectric_to_others = false;
+		all_count_of_remove += eraseVisitor(moves, [&](const std::pair<hanoi_limit, hanoi_limit>& move) -> bool {
+			const auto& [from, to] = move;
+			if (from == 0 && !frame.getColumnSize(to)) {
+				if (stop_simectric_to_others)
+					return false;
+				stop_simectric_to_others = true;
+			}
+			return true;
+		});
+	}
+	std::string name() const override {
+		return "SimetricMoves";
+	}
+};
+
+

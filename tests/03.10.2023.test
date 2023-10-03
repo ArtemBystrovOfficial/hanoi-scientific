@@ -1,0 +1,284 @@
+------------------------------
+N: 4 M: 3
+------------------------------
+-------
+[ RAW 3 38 35 0 1 3 5 0 1 0 1 1 1 2  ]
+-------
+
+
+  0 1 2
+------- | MOV: 3 ( 5 )
+Efficiency coficent:
+        AdvantageColumns        9
+        BasicShiftingRules      22
+        BadGenerations  0
+        AntiLoopDP      6
+        EmptyMove       2
+        SimetricMoves   2
+Total frames: 4
+Time execution: 0.0022071s
+------------------------------
+N: 4 M: 5
+------------------------------
+-------
+[ RAW 7 32 35 0 1 4 7 0 2 3 2 2 1 0 1 4  ]
+-------
+
+
+
+  2 0
+  3 1 4
+------- | MOV: 7 ( 13 )
+Efficiency coficent:
+        AdvantageColumns        90
+        BasicShiftingRules      244
+        BadGenerations  0
+        AntiLoopDP      156
+        EmptyMove       5
+        SimetricMoves   2
+Total frames: 48
+Time execution: 0.0041912s
+------------------------------
+N: 4 M: 8
+------------------------------
+-------
+[ RAW 17 101 34 0 1 6 10 0 4 3 2 1 0 3 6 5 4 1 7  ]
+-------
+
+
+
+
+  0
+  1 4
+  2 5
+  3 6 7
+------- | MOV: 17 ( 33 )
+Efficiency coficent:
+        AdvantageColumns        2298
+        BasicShiftingRules      12649
+        BadGenerations  0
+        AntiLoopDP      9891
+        EmptyMove       54
+        SimetricMoves   2
+Total frames: 2328
+Time execution: 0.0145938s
+------------------------------
+N: 4 M: 12
+------------------------------
+-------
+[ RAW 41 101 34 0 1 3 11 0 1 11 7 6 5 4 3 2 1 0 4 10 9 8 7  ]
+-------
+
+
+
+
+
+    0
+    1
+    2
+    3 7
+    4 8
+    5 9
+  11 6 10
+------- | MOV: 41 ( 81 )
+Efficiency coficent:
+        AdvantageColumns        122172
+        BasicShiftingRules      1640687
+        BadGenerations  0
+        AntiLoopDP      1333988
+        EmptyMove       602
+        SimetricMoves   14
+Total frames: 286283
+Time execution: 0.995651s
+------------------------------
+N: 4 M: 14
+------------------------------
+-------
+[ RAW 57 13 57 0 1 11 13 0 9 8 7 6 5 4 3 2 1 0 1 13 4 12 11 10 9  ]
+-------
+
+
+
+
+
+  0
+  1
+  2
+  3
+  4
+  5   9
+  6   10
+  7   11
+  8 13 12
+------- | MOV: 57 ( 113 )
+Efficiency coficent:
+        AdvantageColumns        277848
+        BasicShiftingRules      5713679
+        BadGenerations  1025821
+        AntiLoopDP      3661784
+        EmptyMove       557
+        SimetricMoves   3
+Total frames: 981692
+Time execution: 2.65413s
+------------------------------
+N: 5 M: 3
+------------------------------
+---------
+[ RAW 3 170 245 0 1 3 5 7 0 1 0 1 1 1 2 0  ]
+---------
+
+
+  0 1 2
+--------- | MOV: 3 ( 5 )
+Efficiency coficent:
+        AdvantageColumns        16
+        BasicShiftingRules      41
+        BadGenerations  0
+        AntiLoopDP      13
+        EmptyMove       0
+        SimetricMoves   3
+Total frames: 4
+Time execution: 0.0037204s
+------------------------------
+N: 5 M: 5
+------------------------------
+---------
+[ RAW 6 101 34 0 1 3 6 8 0 1 4 2 1 0 1 2 1 3  ]
+---------
+
+
+
+    0
+  4 1 2 3
+--------- | MOV: 6 ( 11 )
+Efficiency coficent:
+        AdvantageColumns        100
+        BasicShiftingRules      239
+        BadGenerations  0
+        AntiLoopDP      131
+        EmptyMove       7
+        SimetricMoves   4
+Total frames: 27
+Time execution: 0.0061004s
+------------------------------
+N: 5 M: 8
+------------------------------
+---------
+[ RAW 12 101 34 0 1 5 8 11 0 3 4 3 2 2 1 0 2 6 5 1 7  ]
+---------
+
+
+
+
+
+  2
+  3 0 5
+  4 1 6 7
+--------- | MOV: 12 ( 23 )
+Efficiency coficent:
+        AdvantageColumns        3936
+        BasicShiftingRules      15861
+        BadGenerations  0
+        AntiLoopDP      12217
+        EmptyMove       44
+        SimetricMoves   9
+Total frames: 1758
+Time execution: 0.0129997s
+------------------------------
+N: 5 M: 12
+------------------------------
+---------
+[ RAW 24 11 24 0 1 7 12 14 0 5 4 3 2 1 0 4 8 7 6 5 1 11 2 10 9  ]
+---------
+
+
+
+
+
+
+
+  0
+  1 5
+  2 6
+  3 7   9
+  4 8 11 10
+--------- | MOV: 24 ( 47 )
+Efficiency coficent:
+        AdvantageColumns        394940
+        BasicShiftingRules      3995223
+        BadGenerations  550601
+        AntiLoopDP      2772552
+        EmptyMove       2293
+        SimetricMoves   37
+Total frames: 419773
+Time execution: 2.07042s
+------------------------------
+N: 6 M: 5
+------------------------------
+-----------
+[ RAW 5 101 34 0 1 3 5 7 9 0 1 0 1 1 1 2 1 3 1 4  ]
+-----------
+
+
+
+
+  0 1 2 3 4
+----------- | MOV: 5 ( 9 )
+Efficiency coficent:
+        AdvantageColumns        50
+        BasicShiftingRules      172
+        BadGenerations  0
+        AntiLoopDP      69
+        EmptyMove       4
+        SimetricMoves   5
+Total frames: 11
+Time execution: 0.004174s
+------------------------------
+N: 6 M: 7
+------------------------------
+-----------
+[ RAW 9 101 34 0 1 4 7 9 11 0 2 5 2 2 1 0 1 6 1 3 1 4  ]
+-----------
+
+
+
+
+
+  2 0
+  5 1 6 3 4
+----------- | MOV: 9 ( 17 )
+Efficiency coficent:
+        AdvantageColumns        1460
+        BasicShiftingRules      4523
+        BadGenerations  0
+        AntiLoopDP      3146
+        EmptyMove       36
+        SimetricMoves   5
+Total frames: 329
+Time execution: 0.0075196s
+------------------------------
+N: 6 M: 10
+------------------------------
+-----------
+[ RAW 15 9 15 0 1 4 7 11 14 0 2 5 2 2 1 0 3 6 4 3 2 8 7 1 9  ]
+-----------
+
+
+
+
+
+
+
+      3
+  2 0 4 7
+  5 1 6 8 9
+----------- | MOV: 15 ( 29 )
+Efficiency coficent:
+        AdvantageColumns        95040
+        BasicShiftingRules      439231
+        BadGenerations  12283
+        AntiLoopDP      344382
+        EmptyMove       1420
+        SimetricMoves   25
+Total frames: 31903
+Time execution: 0.216685s

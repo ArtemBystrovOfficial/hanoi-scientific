@@ -4,15 +4,20 @@
 #include <iostream>
 #include <array>
 
+
 #pragma pack (push, 1)
 template<hanoi_limit N, hanoi_limit M>
 class FrameImpl {
 public:
 	~FrameImpl() = default;
 
-	static constexpr hanoi_limit HEADER_SIZE = 1; // DEPTH //
-	static constexpr hanoi_limit HEADER_DEPTH_OFFSET = 0;
-	static constexpr hanoi_limit HEADER_DEPTH_SIZE	= 1;
+	static constexpr hanoi_limit	HEADER_DEPTH_OFFSET = 0;
+	static constexpr hanoi_limit	HEADER_DEPTH_SIZE = 1;
+	static constexpr hanoi_limit	HEADER_MAX_CIRCLE_OFFSET = 1;
+	static constexpr hanoi_limit	HEADER_MAX_CIRCLE_SIZE = 1;
+	static constexpr hanoi_limit	HEADER_DEPTH_MAX_CIRCLE_OFFSET = 2;
+	static constexpr hanoi_limit	HEADER_DEPTH_MAX_CIRCLE_SIZE = 1;
+	static constexpr hanoi_limit HEADER_SIZE = HEADER_DEPTH_SIZE + HEADER_MAX_CIRCLE_SIZE + HEADER_MAX_CIRCLE_SIZE; // DEPTH //
 	static constexpr hanoi_limit COLUMN_POINTERS_SIZE = N;
 	static constexpr hanoi_limit COLUMN_POINTERS_OFFSET = HEADER_SIZE;
 	static constexpr hanoi_limit DATA_AREA_SIZE = N+M;
@@ -30,6 +35,9 @@ public:
 	hanoi_limit getDepth() const {
 		return m_data_[HEADER_DEPTH_OFFSET];
 	}
+	std::pair<hanoi_limit, hanoi_limit>  getMaxCircle() const {
+		return { m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET], m_data_[HEADER_MAX_CIRCLE_OFFSET] };
+	}
 	uuid_columns_pack_t<N> getHashColumns() const {
 		uuid_columns_pack_t<N> pack; //rvo
 		storeColumnsUuids(&pack);
@@ -37,7 +45,9 @@ public:
 	}
 	FrameImpl() { //this is initial postion 
 		m_data_[HEADER_DEPTH_OFFSET] = 0;
+		m_data_[HEADER_MAX_CIRCLE_OFFSET] = 0;
 		m_data_[COLUMN_POINTERS_OFFSET] = 0;
+		m_data_[HEADER_MAX_CIRCLE_OFFSET] = 0;
 
 		for (int j = 1, i = m_data_.size() - (N - 1); i < m_data_.size(); ++i, ++j) {
 			m_data_[COLUMN_POINTERS_OFFSET + j] = i - DATA_AREA_OFFSET;
@@ -51,10 +61,18 @@ public:
 	} 
 	FrameImpl(const FrameImpl<N,M>& frame, hanoi_limit n_move_from, hanoi_limit n_move_to) {
 
-		hanoi_limit i = 0;
-		for (;i < COLUMN_POINTERS_OFFSET; ++i)
-			m_data_[i] = frame.m_data_[i] + 1;
+		m_data_[HEADER_DEPTH_OFFSET] = frame.m_data_[HEADER_DEPTH_OFFSET] + 1; // DEPTH
+		m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET] = m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET];
+		if (n_move_from == 0) { // HEADER_MAX_CIRCLE_OFFSET
+			if (frame.getLastCircle(n_move_from) > frame.m_data_[HEADER_MAX_CIRCLE_OFFSET]) {
+				m_data_[HEADER_MAX_CIRCLE_OFFSET] = frame.getLastCircle(n_move_from);
+				m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET] = m_data_[HEADER_DEPTH_OFFSET];
+			}
+		}
+		else
+			m_data_[HEADER_MAX_CIRCLE_OFFSET] = frame.m_data_[HEADER_MAX_CIRCLE_OFFSET];
 
+		hanoi_limit i = COLUMN_POINTERS_OFFSET;
 		for (;i <= COLUMN_POINTERS_OFFSET + std::min(n_move_from, n_move_to); ++i)
 			m_data_[i] = frame.m_data_[i];
 		
@@ -180,6 +198,10 @@ public:
 	}
 	hanoi_limit getDepth() const {
 		return m_impl.getDepth();
+	}
+	//DEPTH - MAX_CIRCLE
+	std::pair<hanoi_limit, hanoi_limit>  getMaxCircle() const {
+		return m_impl.getMaxCircle();
 	}
 	auto getHashColumns() const {
 		return m_impl.getHashColumns();
