@@ -9,7 +9,7 @@
 #include <bitset>
 
 int main() {
-    Hanoi<5, 14> hanoi;
+    Hanoi<4, 14> hanoi;
 	auto start = std::chrono::steady_clock::now();
 #ifdef PARALLEL_MODE
 	std::vector<std::thread> ths(std::thread::hardware_concurrency());
@@ -20,8 +20,6 @@ int main() {
 #else
 	hanoi.run();
 #endif
-
 	auto end = std::chrono::steady_clock::now();
-
 	std::cout << "Time execution: " << std::chrono::duration <double, std::milli>(end - start).count() / 1000 << "s";
 }

@@ -9,7 +9,7 @@ constexpr hanoi_limit HANOI_LIMIT_NULL = 255; //Reserver
 using crc64_t = boost::crc_optimal<64, 0x04C11DB7, 0xFFFFFFFF, 0xFFFFFFFF, true, true>;
 
 template<hanoi_limit N>
-using uuid_columns_pack_t = std::array<uint64_t, N>;
+using uuid_columns_pack_t = std::array<uint32_t, N>;
 
 //#define PARALLEL_MODE
 

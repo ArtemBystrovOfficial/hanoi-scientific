@@ -8,7 +8,7 @@ template<hanoi_limit N, hanoi_limit M>
 class Hanoi {
 public:
 	//initial
-	Hanoi() : is_result_promised( false ) {};
+	Hanoi() {};
 
 	void run() {
 		while (true) {
@@ -16,16 +16,24 @@ public:
 			//frame.dumpData();
 			frame_moves moves(make_basic_moves<N>());
 			OptimizationPacket<N,M>::Instance().iterate(&moves, frame);
-			if (frame.dumpEnd() || is_result_promised.load()) {
-				is_result_promised.store(true);
+			if (frame.dumpEnd() 
+#ifdef PARALLEL_MODE
+				|| is_result_promised.load()
+#endif	
+				) {
 				break;
 			}
 			frame.acceptMoves(&moves);
 			while (!frame.isEndIterate())
 				RecursiveQueue<N,M>::Instance().push(frame.generateNext());
 		}
-		OptimizationPacket<N, M>::Instance().dumpScoreOptimization();
+#ifdef PARALLEL_MODE
+		if(!is_result_promised.exchange(true))
+#endif
+			OptimizationPacket<N, M>::Instance().dumpScoreOptimization();
 	}
 private:
-	std::atomic<bool> is_result_promised;
+#ifdef PARALLEL_MODE
+	std::atomic<bool> is_result_promised { false };
+#endif
 };

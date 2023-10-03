@@ -74,6 +74,7 @@ class AntiLoopDP : public OptimizationUnit<N, M> {
 public:
 
 	AntiLoopDP() {
+		
 	}
 
 	void optimize(frame_moves* moves, const Frame<N, M>& frame) override {
@@ -109,10 +110,8 @@ private:
 #ifdef PARALLEL_MODE
 	static std::shared_mutex mut;
 #endif
-	static std::map<uuid_columns_pack_t<N>, hanoi_limit> m_history;
+	std::map<uuid_columns_pack_t<N>, hanoi_limit> m_history;
 };
-template<hanoi_limit N, hanoi_limit M>
-std::map<uuid_columns_pack_t<N>, hanoi_limit> AntiLoopDP<N, M>::m_history = {};
 
 #ifdef PARALLEL_MODE
 template<hanoi_limit N, hanoi_limit M>
@@ -137,5 +136,33 @@ public:
 	}
 	std::string name() const override {
 		return "EmptyMove";
+	}
+};
+
+
+// THE ADVANTAGE OF NON-FIRST COLUMNS
+//   
+//	   <--        ---	
+//     2 |        2 |
+//	ok 3 1    bad 3 v 1
+////////////////////////
+#include <iostream>
+template<hanoi_limit N, hanoi_limit M>
+class AdvantageColumns : public OptimizationUnit<N, M> {
+public:
+	void optimize(frame_moves* moves, const Frame<N, M>& frame) override {
+		all_count_of_remove += eraseVisitor(moves, [&](const std::pair<hanoi_limit, hanoi_limit>& move) -> bool {
+			const auto& [from, to] = move;
+			if (to == 0) {
+				for (hanoi_limit i = 1; i < N; ++i) {
+					if (!frame.getColumnSize(i))
+						return false;
+				}
+			}
+			return true;
+		});
+	}
+	std::string name() const override {
+		return "AdvantageColumns";
 	}
 };

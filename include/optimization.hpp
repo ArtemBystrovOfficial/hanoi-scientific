@@ -32,9 +32,10 @@ public:
 	}
 private:
 	OptimizationPacket() : count_all_frames(0) {
-		m_units.push_back(make_unit <N,M, BasicShiftingRules<N, M>>());
-		m_units.push_back(make_unit <N,M, AntiLoopDP<N, M>>());
-		m_units.push_back(make_unit <N,M, EmptyMove<N, M>>());
+		m_units.push_back(make_unit <N, M,  BasicShiftingRules<N, M>>());
+		m_units.push_back(make_unit <N, M,  AntiLoopDP<N, M>>());
+		m_units.push_back(make_unit <N, M,  EmptyMove<N, M>>());
+		m_units.push_back(make_unit <N, M, AdvantageColumns<N, M>>());
 	}
 	std::vector <std::unique_ptr<OptimizationUnit<N,M>>> m_units;
 	uint64_t count_all_frames;
