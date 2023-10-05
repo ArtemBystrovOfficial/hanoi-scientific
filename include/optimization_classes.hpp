@@ -139,7 +139,7 @@ public:
 		if (it == m_minimal_move.end())
 			m_minimal_move[depth_from_max_circle] = max_circle;
 		else {
-			if (it->second > max_circle + 1)
+			if (it->second > max_circle)
 				is_kill = true;
 			else if(it->second < max_circle) 
 				m_minimal_move[depth_from_max_circle] = max_circle;
@@ -227,4 +227,46 @@ public:
 	}
 };
 
+// LAST STEP NONE MOVEBLE  
+//	   ___            ___	
+//     1 |  ->      1 | |
+//	ok 2 V		bad 2 1 V
+///////////////////////////
+template<hanoi_limit N, hanoi_limit M>
+class LastStepNoneMoveble : public OptimizationUnit<N, M> {
+public:
+	void optimize(frame_moves* moves, const Frame<N, M>& frame) override {
+		bool stop_simectric_to_others = false;
+		all_count_of_remove += eraseVisitor(moves, [&](const std::pair<hanoi_limit, hanoi_limit>& move) -> bool {
+			const auto& [from, to] = move;
+			return from != frame.getLastMoveTo();
+		});
+	}
+	std::string name() const override {
+		return "LastStepNoneMoveble";
+	}
+};
 
+// IF ANY EMPTY COLUMN, MOVE  
+//	   ___            	
+//     1 |     
+//	ok 2 V 0		
+////////////////
+template<hanoi_limit N, hanoi_limit M>
+class EmptyAnyColumnMove : public OptimizationUnit<N, M> {
+public:
+	void optimize(frame_moves* moves, const Frame<N, M>& frame) override {
+		for (auto& [from, to]:moves->moves) {
+			if (!frame.getColumnSize(to) && from == 0 ) {
+				all_count_of_remove += moves->moves.size() - 1;
+				std::pair<hanoi_limit, hanoi_limit> out_pair = {from,to};
+				moves->moves.clear();
+				moves->moves.push_back(out_pair);
+				break;
+			}
+		} 
+	}
+	std::string name() const override {
+		return "EmptyAnyColumnMove";
+	}
+};

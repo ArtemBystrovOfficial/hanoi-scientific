@@ -14,10 +14,6 @@ namespace boost::lockfree {
 template<hanoi_limit N, hanoi_limit M>
 class RecursiveQueue {
 public:
-	static RecursiveQueue<N, M>& Instance() {
-		static RecursiveQueue<N, M> packet;
-		return packet;
-	}
 	void push(Frame<N, M>&& frame) {
 		m_frames.push(frame);
 	}
@@ -31,10 +27,10 @@ public:
 #endif
 		return frame;
 	}
-private:
 	RecursiveQueue() {
 		push(Frame<N, M>{}); //initital
 	}
+private:
 #ifdef PARALLEL_MODE
 	boost::lockfree::queue<Frame<N, M>> m_frames{ 0 };
 #else

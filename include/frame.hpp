@@ -17,7 +17,13 @@ public:
 	static constexpr hanoi_limit	HEADER_MAX_CIRCLE_SIZE = 1;
 	static constexpr hanoi_limit	HEADER_DEPTH_MAX_CIRCLE_OFFSET = 2;
 	static constexpr hanoi_limit	HEADER_DEPTH_MAX_CIRCLE_SIZE = 1;
-	static constexpr hanoi_limit HEADER_SIZE = HEADER_DEPTH_SIZE + HEADER_MAX_CIRCLE_SIZE + HEADER_MAX_CIRCLE_SIZE; // DEPTH //
+	static constexpr hanoi_limit	LAST_COLUMN_TO_OFFSET = 3;
+	static constexpr hanoi_limit	LAST_COLUMN_TO_SIZE = 1;
+	static constexpr hanoi_limit	LAST_COLUMN_FROM_OFFSET = 4;
+	static constexpr hanoi_limit	LAST_COLUMN_FROM_SIZE = 1;
+	static constexpr hanoi_limit HEADER_SIZE = HEADER_DEPTH_SIZE + HEADER_MAX_CIRCLE_SIZE + 
+											   HEADER_MAX_CIRCLE_SIZE + LAST_COLUMN_TO_SIZE
+											   + LAST_COLUMN_FROM_SIZE; // DEPTH //
 	static constexpr hanoi_limit COLUMN_POINTERS_SIZE = N;
 	static constexpr hanoi_limit COLUMN_POINTERS_OFFSET = HEADER_SIZE;
 	static constexpr hanoi_limit DATA_AREA_SIZE = N+M;
@@ -35,6 +41,9 @@ public:
 	hanoi_limit getDepth() const {
 		return m_data_[HEADER_DEPTH_OFFSET];
 	}
+	hanoi_limit getLastMoveTo() const {
+		return m_data_[LAST_COLUMN_TO_OFFSET];
+	}
 	std::pair<hanoi_limit, hanoi_limit>  getMaxCircle() const {
 		return { m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET], m_data_[HEADER_MAX_CIRCLE_OFFSET] };
 	}
@@ -47,7 +56,9 @@ public:
 		m_data_[HEADER_DEPTH_OFFSET] = 0;
 		m_data_[HEADER_MAX_CIRCLE_OFFSET] = 0;
 		m_data_[COLUMN_POINTERS_OFFSET] = 0;
-		m_data_[HEADER_MAX_CIRCLE_OFFSET] = 0;
+		m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET] = 0;
+		m_data_[LAST_COLUMN_TO_OFFSET] = HANOI_LIMIT_NULL;
+		m_data_[LAST_COLUMN_FROM_OFFSET] = HANOI_LIMIT_NULL;
 
 		for (int j = 1, i = m_data_.size() - (N - 1); i < m_data_.size(); ++i, ++j) {
 			m_data_[COLUMN_POINTERS_OFFSET + j] = i - DATA_AREA_OFFSET;
@@ -62,15 +73,16 @@ public:
 	FrameImpl(const FrameImpl<N,M>& frame, hanoi_limit n_move_from, hanoi_limit n_move_to) {
 
 		m_data_[HEADER_DEPTH_OFFSET] = frame.m_data_[HEADER_DEPTH_OFFSET] + 1; // DEPTH
-		m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET] = m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET];
+		m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET] = frame.m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET];
+		m_data_[HEADER_MAX_CIRCLE_OFFSET] = frame.m_data_[HEADER_MAX_CIRCLE_OFFSET];
+		m_data_[LAST_COLUMN_TO_OFFSET] = n_move_to;
+		m_data_[LAST_COLUMN_FROM_OFFSET] = n_move_from;
 		if (n_move_from == 0) { // HEADER_MAX_CIRCLE_OFFSET
 			if (frame.getLastCircle(n_move_from) > frame.m_data_[HEADER_MAX_CIRCLE_OFFSET]) {
 				m_data_[HEADER_MAX_CIRCLE_OFFSET] = frame.getLastCircle(n_move_from);
 				m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET] = m_data_[HEADER_DEPTH_OFFSET];
-			}
+			} 
 		}
-		else
-			m_data_[HEADER_MAX_CIRCLE_OFFSET] = frame.m_data_[HEADER_MAX_CIRCLE_OFFSET];
 
 		hanoi_limit i = COLUMN_POINTERS_OFFSET;
 		for (;i <= COLUMN_POINTERS_OFFSET + std::min(n_move_from, n_move_to); ++i)
@@ -117,11 +129,24 @@ public:
 	}
 
 	void dumpData() {
-		std::cout << std::string(N * 2 - 1, '-') << std::endl;
 		std::cout << "[ RAW ";
 		for (auto elem : m_data_)
 			std::cout << uint32_t(elem) << " ";
 		std::cout << " ] " << std::endl;
+
+		auto [from, to] = getLastMove();
+
+		if (from != HANOI_LIMIT_NULL) {
+			std::string padding_left;
+			if (from > to) {
+				padding_left = (to == 0) ? "" : std::string(to * 2, ' ');
+				std::cout << padding_left << "|<" << ((from - to == 1) ? "" : std::string((from - to - 1) * 2, '-')) << "|\n";
+			}
+			else {
+				padding_left = (from == 0) ? "" : std::string(from * 2, ' ');
+				std::cout << padding_left << "|" << ((to - from == 1) ? "" : std::string((to - from - 1) * 2, '-')) << ">|\n";
+			}
+		}
 		std::cout << std::string(N * 2 - 1, '-') << std::endl;
 		for (int j = M-1; j >= 0; --j) {
 			for (int i = 0; i < N; ++i) 
@@ -132,6 +157,11 @@ public:
 	}
 	
 private:
+
+	std::pair<hanoi_limit, hanoi_limit> getLastMove() const {
+		return { m_data_[LAST_COLUMN_FROM_OFFSET], m_data_[LAST_COLUMN_TO_OFFSET] };
+	}
+
 	void storeColumnsUuids(uuid_columns_pack_t<N> *arr) const {
 		for (hanoi_limit i = 0; i < N-1; ++i)
 			arr->at(i) = getUuidColumn(i+1);
@@ -198,6 +228,9 @@ public:
 	}
 	hanoi_limit getDepth() const {
 		return m_impl.getDepth();
+	}
+	hanoi_limit getLastMoveTo() const {
+		return m_impl.getLastMoveTo();
 	}
 	//DEPTH - MAX_CIRCLE
 	std::pair<hanoi_limit, hanoi_limit>  getMaxCircle() const {

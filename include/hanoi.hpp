@@ -21,10 +21,10 @@ public:
 		std::cout << std::string(30, '-') << std::endl;
 #endif	
 		while (true) {
-			Frame<N, M> frame = RecursiveQueue<N, M>::Instance().pop();
-			//frame.dumpData();
+			Frame<N, M> frame = m_recursive_queue.pop();
+			frame.dumpData();
 			frame_moves moves(make_basic_moves<N>());
-			OptimizationPacket<N, M>::Instance().iterate(&moves, frame);
+			m_optimization_packet.iterate(&moves, frame);
 			if (frame.dumpEnd()
 #ifdef PARALLEL_MODE
 				|| is_result_promised.load()
@@ -34,28 +34,20 @@ public:
 			}
 			frame.acceptMoves(&moves);
 			while (!frame.isEndIterate())
-				RecursiveQueue<N, M>::Instance().push(frame.generateNext());
+				m_recursive_queue.push(frame.generateNext());
 		}
 #ifdef PARALLEL_MODE
 		if (!is_result_promised.exchange(true))
 #endif
-			OptimizationPacket<N, M>::Instance().dumpScoreOptimization();
+			m_optimization_packet.dumpScoreOptimization();
 	}
-	private:
+private:
+	OptimizationPacket<N, M> m_optimization_packet;
+	RecursiveQueue<N, M> m_recursive_queue;
 #ifdef PARALLEL_MODE
 	std::atomic<bool> is_result_promised{ false };
 #endif
 };
-
-template <int First, int Last, typename Lambda>
-inline void static_for(Lambda const& f)
-{
-	if constexpr (First < Last)
-	{
-		f(std::integral_constant<int, First>{});
-		static_for<First + 1, Last>(f);
-	}
-}
 
 template<hanoi_limit N, hanoi_limit M>
 void singleRun() {
