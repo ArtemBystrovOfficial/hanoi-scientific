@@ -14,15 +14,16 @@ class Hanoi {
 public:
 	//initial
 	Hanoi() {};
-	void run() {
+	uint32_t run() {
 #ifndef PARALLEL_MODE
 		std::cout << std::string(30, '-') << std::endl;
 		std::cout << "N: " << int(N) << " M: " << int(M) << std::endl;
 		std::cout << std::string(30, '-') << std::endl;
 #endif	
+		uint32_t out;
 		while (true) {
 			Frame<N, M> frame = m_recursive_queue.pop();
-			frame.dumpData();
+			//frame.dumpData();
 			frame_moves moves(make_basic_moves<N>());
 			m_optimization_packet.iterate(&moves, frame);
 			if (frame.dumpEnd()
@@ -30,6 +31,7 @@ public:
 				|| is_result_promised.load()
 #endif	
 				) {
+				out = frame.getDepth();
 				break;
 			}
 			frame.acceptMoves(&moves);
@@ -39,7 +41,8 @@ public:
 #ifdef PARALLEL_MODE
 		if (!is_result_promised.exchange(true))
 #endif
-			m_optimization_packet.dumpScoreOptimization();
+		m_optimization_packet.dumpScoreOptimization();
+		return out * 2 - 1;
 	}
 private:
 	OptimizationPacket<N, M> m_optimization_packet;
@@ -50,7 +53,7 @@ private:
 };
 
 template<hanoi_limit N, hanoi_limit M>
-void singleRun() {
+uint32_t singleRun() {
 	hanoi::Hanoi<N, M> hanoi;
 	auto start = std::chrono::steady_clock::now();
 #ifdef PARALLEL_MODE
@@ -61,7 +64,7 @@ void singleRun() {
 	for (auto& th : ths)
 		th.join();
 #else
-	hanoi.run();
+	return hanoi.run();
 #endif
 	auto end = std::chrono::steady_clock::now();
 	std::cout << "Time execution: " <<

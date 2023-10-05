@@ -71,7 +71,6 @@ public:
 		m_data_[DATA_AREA_OFFSET] = M;
 	} 
 	FrameImpl(const FrameImpl<N,M>& frame, hanoi_limit n_move_from, hanoi_limit n_move_to) {
-
 		m_data_[HEADER_DEPTH_OFFSET] = frame.m_data_[HEADER_DEPTH_OFFSET] + 1; // DEPTH
 		m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET] = frame.m_data_[HEADER_DEPTH_MAX_CIRCLE_OFFSET];
 		m_data_[HEADER_MAX_CIRCLE_OFFSET] = frame.m_data_[HEADER_MAX_CIRCLE_OFFSET];
@@ -85,7 +84,7 @@ public:
 		}
 
 		hanoi_limit i = COLUMN_POINTERS_OFFSET;
-		for (;i <= COLUMN_POINTERS_OFFSET + std::min(n_move_from, n_move_to); ++i)
+		for (;i <= COLUMN_POINTERS_OFFSET + (std::min)(n_move_from, n_move_to); ++i)
 			m_data_[i] = frame.m_data_[i];
 		
 		if (n_move_from > n_move_to) {
