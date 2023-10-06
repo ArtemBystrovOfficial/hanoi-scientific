@@ -32,12 +32,14 @@ struct frame_moves {
 };
 
 template <hanoi_limit N>
-frame_moves make_basic_moves() {
+frame_moves make_basic_moves(hanoi_limit ignore_column = -1) {
 	frame_moves moves; //rvo
-	for (int i = 0; i < N; i++)
-		for (int j = 0; j < N; j++)
-			if (i != j)
-				moves.moves.push_back({ i,j });
+	for (hanoi_limit i = 0; i < N; i++) {
+		if (i != ignore_column)
+			for (hanoi_limit j = 0; j < N; j++)
+				if (i != j)
+					moves.moves.push_back({ i,j });
+	}
 	return moves;
 }
 

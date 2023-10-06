@@ -27,6 +27,9 @@ public:
 #endif
 		return frame;
 	}
+	void clear() {
+		m_frames = std::queue<Frame<N, M>>{};
+	}
 	RecursiveQueue() {
 		push(Frame<N, M>{}); //initital
 	}
