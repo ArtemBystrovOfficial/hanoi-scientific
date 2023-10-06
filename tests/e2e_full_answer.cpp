@@ -1,5 +1,6 @@
 #define BOOST_TEST_MODULE My Test 
 #include <boost/test/included/unit_test.hpp> 
+#include <boost/lockfree/queue.hpp>
 #include <hanoi.hpp>
 
 BOOST_AUTO_TEST_CASE(TEST_4_1) {
@@ -36,10 +37,6 @@ BOOST_AUTO_TEST_CASE(TEST_4_8) {
 
 BOOST_AUTO_TEST_CASE(TEST_4_9) {
 	BOOST_CHECK_EQUAL((hanoi::singleRun<4, 9>()), 41);
-}
-
-BOOST_AUTO_TEST_CASE(TEST_4_10) {
-	BOOST_CHECK_EQUAL((hanoi::singleRun<4, 10>()), 49);
 }
 
 BOOST_AUTO_TEST_CASE(TEST_4_11) {

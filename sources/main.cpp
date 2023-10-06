@@ -2,5 +2,5 @@
 #include <boost/lockfree/queue.hpp>
 
 int main() {
-	auto b = hanoi::singleRun<4, 14>();
+	auto b = hanoi::singleRun<5, 15>();
 }

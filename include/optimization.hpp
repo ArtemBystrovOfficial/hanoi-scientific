@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+namespace hanoi {
+
 template<hanoi_limit N, hanoi_limit M, class Unit>
 std::unique_ptr<OptimizationUnit<N, M>>static inline make_unit() {
 	return std::unique_ptr<OptimizationUnit<N, M>>(dynamic_cast<OptimizationUnit<N, M>*>(new Unit));
@@ -40,3 +42,4 @@ private:
 	uint64_t count_all_frames;
 };
 
+}

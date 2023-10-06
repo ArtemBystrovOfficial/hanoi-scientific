@@ -17,25 +17,25 @@ public:
 		initIndex();
 	};
 	uint32_t run() {
-		if constexpr (!parallel) {
-			std::cout << std::string(30, '-') << std::endl;
-			std::cout << "N: " << int(N) << " M: " << int(M) << std::endl;
-			std::cout << std::string(30, '-') << std::endl;
-		}
 		uint32_t out;
+		if constexpr (!parallel) 
+			printHeader();
+
 		while (true) {
 			Frame<N, M> frame = m_recursive_queue.pop();
 
 			if constexpr (N==4) //BETA ONLY FOR 4 
 				if (isMiddleOptimization(frame))
-					continue;
+		    		continue;
+
+				//frame.dumpData();
 			//frame.dumpData();
 			frame_moves moves  = m_is_beta_confirm ? make_basic_moves<N>(m_is_beta_column)
 												   : make_basic_moves<N>();
 			m_optimization_packet.iterate(&moves, frame);
 			if (frame.dumpEnd() || is_result_promised.load()	
 				) {
-				out = frame.getDepth();
+				out = frame.getDepth() * 2 - 1;
 				break;
 			}
 			frame.acceptMoves(&moves);
@@ -43,10 +43,10 @@ public:
 				m_recursive_queue.push(frame.generateNext());
 		}
 		if constexpr (parallel)
-			if (!is_result_promised.exchange(true))
-
+			if (is_result_promised.exchange(true))
+				return out;
 		m_optimization_packet.dumpScoreOptimization();
-		return out * 2 - 1;
+		return out;
 	}
 private:
 	bool isMiddleOptimization(Frame<N, M> &frame) {
@@ -75,6 +75,12 @@ private:
 		m_beta_index = Left;
 	}
 
+	void printHeader() {
+		std::cout << std::string(30, '-') << std::endl;
+		std::cout << "N: " << int(N) << " M: " << int(M) << std::endl;
+		std::cout << std::string(30, '-') << std::endl;
+	}
+
 	int32_t m_beta_index = -1;
 	bool m_is_beta_confirm = false;
 	hanoi_limit m_is_beta_column = 0;
@@ -97,9 +103,9 @@ uint32_t singleRun() {
 		for (auto& th : ths)
 			th.join();
 	}
-	else {
+	else 
 		out = hanoi.run();
-	}
+
 	auto end = std::chrono::steady_clock::now();
 	std::cout << "Time execution: " <<
 		std::chrono::duration <double, std::milli>(end - start).count() / 1000 << "s" << std::endl;

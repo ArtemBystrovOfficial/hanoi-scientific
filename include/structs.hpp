@@ -3,6 +3,8 @@
 #include <list>
 #include <boost/crc.hpp>
 
+namespace hanoi {
+
 using hanoi_limit = uint8_t;
 constexpr hanoi_limit HANOI_LIMIT_NULL = 255; //Reserver
 
@@ -39,4 +41,6 @@ frame_moves make_basic_moves(hanoi_limit ignore_column = -1) {
 					moves.moves.push_back({ i,j });
 	}
 	return moves;
+}
+
 }

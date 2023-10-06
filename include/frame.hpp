@@ -4,6 +4,7 @@
 #include <iostream>
 #include <array>
 
+namespace hanoi {
 
 #pragma pack (push, 1)
 template<hanoi_limit N, hanoi_limit M>
@@ -148,8 +149,10 @@ public:
 		}
 		std::cout << std::string(N * 2 - 1, '-') << std::endl;
 		for (int j = M-1; j >= 0; --j) {
-			for (int i = 0; i < N; ++i) 
-				std::cout << (getColumnSize(i) > j ? std::to_string(uint32_t(getCircleData(i, j))) + " " : "  ");
+			for (int i = 0; i < N; ++i) {
+				auto circle = getCircleData(i, j);
+				std::cout << (getColumnSize(i) > j ? (circle >= 10 ? char('a' + (circle - 10)) : char('0' + circle)) + std::string(" ") : std::string("  "));
+			}
 			std::cout << std::endl;
 		}
 		std::cout << std::string(N*2 - 1, '-') << " | MOV: "<< uint32_t(getDepth()) << " ( "<< uint32_t(getDepth())*2-1 <<" ) " << std::endl;
@@ -245,3 +248,5 @@ private:
 	FrameImpl<N,M> m_impl;
 	frame_moves* m_moves;
 };
+
+}

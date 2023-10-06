@@ -1,11 +1,14 @@
 #pragma once
 
+
 #include "frame.hpp"
 namespace boost::lockfree {
 	template<class T, typename ...Options>
 	class queue;
 }
 #include <queue>
+
+namespace hanoi {
 
 template<hanoi_limit N, hanoi_limit M, bool parallel>
 class RecursiveQueue {
@@ -43,3 +46,4 @@ private:
 	std::queue<Frame<N, M>> m_frames;
 };
 
+}
