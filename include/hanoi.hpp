@@ -9,7 +9,7 @@ using namespace std::chrono_literals;
 
 namespace hanoi {
 
-template<hanoi_limit N, hanoi_limit M>
+template<hanoi_limit N, hanoi_limit M, bool parallel = false>
 class Hanoi {
 public:
 	//initial
@@ -17,11 +17,11 @@ public:
 		initIndex();
 	};
 	uint32_t run() {
-#ifndef PARALLEL_MODE
-		std::cout << std::string(30, '-') << std::endl;
-		std::cout << "N: " << int(N) << " M: " << int(M) << std::endl;
-		std::cout << std::string(30, '-') << std::endl;
-#endif	
+		if constexpr (!parallel) {
+			std::cout << std::string(30, '-') << std::endl;
+			std::cout << "N: " << int(N) << " M: " << int(M) << std::endl;
+			std::cout << std::string(30, '-') << std::endl;
+		}
 		uint32_t out;
 		while (true) {
 			Frame<N, M> frame = m_recursive_queue.pop();
@@ -33,10 +33,7 @@ public:
 			frame_moves moves  = m_is_beta_confirm ? make_basic_moves<N>(m_is_beta_column)
 												   : make_basic_moves<N>();
 			m_optimization_packet.iterate(&moves, frame);
-			if (frame.dumpEnd()
-#ifdef PARALLEL_MODE
-				|| is_result_promised.load()
-#endif	
+			if (frame.dumpEnd() || is_result_promised.load()	
 				) {
 				out = frame.getDepth();
 				break;
@@ -45,9 +42,9 @@ public:
 			while (!frame.isEndIterate())
 				m_recursive_queue.push(frame.generateNext());
 		}
-#ifdef PARALLEL_MODE
-		if (!is_result_promised.exchange(true))
-#endif
+		if constexpr (parallel)
+			if (!is_result_promised.exchange(true))
+
 		m_optimization_packet.dumpScoreOptimization();
 		return out * 2 - 1;
 	}
@@ -82,31 +79,31 @@ private:
 	bool m_is_beta_confirm = false;
 	hanoi_limit m_is_beta_column = 0;
 
-	OptimizationPacket<N, M> m_optimization_packet;
-	RecursiveQueue<N, M> m_recursive_queue;
-#ifdef PARALLEL_MODE
+	OptimizationPacket<N, M, parallel> m_optimization_packet;
+	RecursiveQueue<N, M, parallel> m_recursive_queue;
 	std::atomic<bool> is_result_promised{ false };
-#endif
 };
 
-template<hanoi_limit N, hanoi_limit M>
+template<hanoi_limit N, hanoi_limit M, bool parallel = false>
 uint32_t singleRun() {
-	hanoi::Hanoi<N, M> hanoi;
+	hanoi::Hanoi<N, M, parallel> hanoi;
 	auto start = std::chrono::steady_clock::now();
-#ifdef PARALLEL_MODE
+	uint32_t out = 0;
 
-	std::vector<std::thread> ths(std::thread::hardware_concurrency());
-	for (int i = 0; i < std::thread::hardware_concurrency(); ++i)
-		ths[i] = std::thread([&]() { hanoi.run(); });
-	for (auto& th : ths)
-		th.join();
-#else
-	auto out = hanoi.run();
+	if constexpr (parallel) {
+		std::vector<std::thread> ths(std::thread::hardware_concurrency());
+		for (int i = 0; i < std::thread::hardware_concurrency(); ++i)
+			ths[i] = std::thread([&]() { hanoi.run(); });
+		for (auto& th : ths)
+			th.join();
+	}
+	else {
+		out = hanoi.run();
+	}
 	auto end = std::chrono::steady_clock::now();
 	std::cout << "Time execution: " <<
 		std::chrono::duration <double, std::milli>(end - start).count() / 1000 << "s" << std::endl;
 	return out;
-#endif
 }
 
 }

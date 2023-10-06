@@ -8,7 +8,7 @@ std::unique_ptr<OptimizationUnit<N, M>>static inline make_unit() {
 	return std::unique_ptr<OptimizationUnit<N, M>>(dynamic_cast<OptimizationUnit<N, M>*>(new Unit));
 }
 
-template<hanoi_limit N, hanoi_limit M>
+template<hanoi_limit N, hanoi_limit M, bool parallel>
 class OptimizationPacket {
 public:
 	void iterate(frame_moves* moves, const Frame<N,M>& frame) {
@@ -30,9 +30,9 @@ public:
 		m_units.push_back(make_unit <N, M, AdvantageColumns<N, M>>());
 		m_units.push_back(make_unit <N, M, LastStepNoneMoveble<N, M>>());
 		m_units.push_back(make_unit <N, M, BasicShiftingRules<N, M>>());
-		m_units.push_back(make_unit <N, M, AntiLoopDP<N, M>>());
+		m_units.push_back(make_unit <N, M, AntiLoopDP<N, M, parallel>>());
 		m_units.push_back(make_unit <N, M, EmptyMove<N, M>>());
-		m_units.push_back(make_unit <N, M, BadGenerations<N, M>>());
+		m_units.push_back(make_unit <N, M, BadGenerations<N, M, parallel>>());
 		m_units.push_back(make_unit <N, M, SimetricMoves<N, M>>());
 	}
 private:

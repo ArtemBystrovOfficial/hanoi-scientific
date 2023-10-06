@@ -3,8 +3,6 @@
 #include <list>
 #include <boost/crc.hpp>
 
-//#define PARALLEL_MODE
-
 using hanoi_limit = uint8_t;
 constexpr hanoi_limit HANOI_LIMIT_NULL = 255; //Reserver
 
@@ -42,6 +40,3 @@ frame_moves make_basic_moves(hanoi_limit ignore_column = -1) {
 	}
 	return moves;
 }
-
-
-//Доделать итерацию по мувам и сделать первые верные ходы хотябы куда можно

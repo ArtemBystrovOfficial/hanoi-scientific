@@ -4,11 +4,7 @@
 #include <functional>
 #include <unordered_map>
 #include <map>
-
-
-#ifdef PARALLEL_MODE
 #include <shared_mutex>
-#endif
 
 template<hanoi_limit N, hanoi_limit M>
 class OptimizationUnit {
@@ -67,10 +63,7 @@ public:
 //      5 1     5  
 // BAD  6 3     6 3 1
 /////////////////////
-
-using hash_count_first_level = uint32_t;
-using hash_count_second_level = uint64_t;
-template<hanoi_limit N, hanoi_limit M>
+template<hanoi_limit N, hanoi_limit M, bool parallel>
 class AntiLoopDP : public OptimizationUnit<N, M> {
 public:
 
@@ -79,50 +72,34 @@ public:
 	}
 
 	void optimize(frame_moves* moves, const Frame<N, M>& frame) override {
+		if constexpr (parallel)
+			mut.lock();
 		all_count_of_remove += eraseVisitor(moves, [&](const std::pair<hanoi_limit, hanoi_limit>& move) -> bool {
 				const auto& [from, to] = move;
 				Frame frame_new(frame, from, to);
 				auto hash = frame_new.getHashColumns();
-#ifdef PARALLEL_MODE
-				mut.lock_shared();
-#endif
 				auto it = m_history.find(hash);
-#ifdef PARALLEL_MODE
-				mut.unlock_shared();
-#endif
 				if (it == m_history.end()) {
-#ifdef PARALLEL_MODE
-					mut.lock();
-#endif
 					m_history[hash] = frame.getDepth();
-#ifdef PARALLEL_MODE
-					mut.unlock();
-#endif
 					return true;
 				}
 				else 
 					return it->second > frame.getDepth();
 			});
+		if constexpr (parallel)
+			mut.unlock();
 	}
 	std::string name() const override {
 		return "AntiLoopDP";
 	}
 private:
-#ifdef PARALLEL_MODE
-	static std::shared_mutex mut;
-#endif
+	std::mutex mut;
 	std::map<uuid_columns_pack_t<N>, hanoi_limit> m_history;
 };
 
-#ifdef PARALLEL_MODE
-template<hanoi_limit N, hanoi_limit M>
-std::shared_mutex AntiLoopDP<N, M>::mut = {};
-#endif
-
-
 // BAD GENERATIONS  
 #include <iostream>
-template<hanoi_limit N, hanoi_limit M>
+template<hanoi_limit N, hanoi_limit M, bool parallel>
 class BadGenerations : public OptimizationUnit<N, M> {
 public:
 	BadGenerations() {
@@ -132,18 +109,22 @@ public:
 	void optimize(frame_moves* moves, const Frame<N, M>& frame) override {
 		bool is_kill = false;
 
-		//auto frame_depth = frame.getDepth();
 		auto [depth_from_max_circle, max_circle] = frame.getMaxCircle();
+		if constexpr(parallel)
+			mut.lock();
 		auto it = m_minimal_move.find(depth_from_max_circle);
-
-		if (it == m_minimal_move.end())
+		if (it == m_minimal_move.end()) {
 			m_minimal_move[depth_from_max_circle] = max_circle;
+		}
 		else {
 			if (it->second > max_circle)
 				is_kill = true;
-			else if(it->second < max_circle) 
+			else if (it->second < max_circle) {
 				m_minimal_move[depth_from_max_circle] = max_circle;
+			}
 		}
+		if constexpr (parallel)
+			mut.unlock();
 		all_count_of_remove += eraseVisitor(moves, [&](const std::pair<hanoi_limit, hanoi_limit>& move) -> bool {;
 			return !is_kill;
 		});
@@ -154,6 +135,7 @@ public:
 private:
 	//DEPTH - MAX CIRCLE
 	std::unordered_map<hanoi_limit, hanoi_limit> m_minimal_move;
+	std::mutex mut;
 };
 
 // EMPTY MOVE
