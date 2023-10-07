@@ -14,7 +14,6 @@
 
   <p align="center">
     Быстрая навигация
-    <br />
     <a href="#about"><strong>О проекте</strong></a>
     <br />
     <br />
@@ -113,9 +112,3 @@ Efficiency coficent: -> работа оптимизаций
 Total frames: 33 -> количество обработанных кадров
 Time execution: 0.162151s
 ```
-
-<a name="license"></a>
-
-
-### Лицензия
-
