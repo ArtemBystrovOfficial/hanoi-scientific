@@ -59,7 +59,7 @@
 #include "../include/hanoi.hpp"
 
 int main() {
-	auto b = hanoi::singleRun<5, 15, true>(); //паралельная сборка
+	auto b = hanoi::singleRun<5, 15, true>(); //параллельная реализация
 }
 ```
 ```bash
