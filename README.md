@@ -75,7 +75,7 @@
 - C++17
 
 <a name="installing"></a>
-### Сборка
+### Сборка и использование
 
 Установите Boost https://www.boost.org/users/history/version_1_82_0.html
 Используйте CMakeLists.txt для сборки
@@ -84,6 +84,34 @@
   cd build
   cmake ..
   cmake --build -j(n) .
+```
+```c++
+#include "../include/hanoi.hpp"
+
+int main() {
+	auto b = hanoi::singleRun<5, 15, true>(); //паралельная сборка
+}
+```
+```bash
+[ RAW 7 4 7 3 0 0 1 4 7 0 2 3 2 2 1 0 1 4  ] -> побайтовое представление данных кадра
+|---->| -> последний ход
+------- -> текущие состаяние башен
+
+
+
+  2 0
+  3 1 4
+------- | MOV: 7 ( 13 ) -> минимальное количество ходов
+Efficiency coficent: -> работа оптимизаций
+        AdvantageColumns        69
+        LastStepNoneMoveble     81
+        BasicShiftingRules      140
+        AntiLoopDP      58
+        EmptyMove       0
+        BadGenerations  0
+        SimetricMoves   0
+Total frames: 33 -> количество обработанных кадров
+Time execution: 0.162151s
 ```
 
 <a name="license"></a>
